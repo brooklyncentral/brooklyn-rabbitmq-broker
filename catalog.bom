@@ -22,10 +22,12 @@ brooklyn.catalog:
   name: RabbitMQ Broker
   description: RabbitMQ is an open source message broker software (i.e. message-oriented middleware) that implements the Advanced Message Queuing Protocol (AMQP) standard
   itemType: template
+  iconUrl: https://s3.amazonaws.com/drigodwin-misc/rabbitmq.png
   license: Apache-2.0
   publish:
     license_code: Apache-2.0
     reference: reference.json
+    qa: catalog.tests.bom
   item:
     services:
     - type: org.apache.brooklyn.entity.messaging.rabbit.RabbitBroker
