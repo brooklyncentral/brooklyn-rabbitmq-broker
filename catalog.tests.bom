@@ -32,7 +32,7 @@ brooklyn.catalog:
         id: rabbitmq
       - type: org.apache.brooklyn.test.framework.TestCase
         brooklyn.config:
-          timeout: 15m
+          timeout: 1h
           targetId: rabbitmq
         name: RabbitMQ Broker tests
         brooklyn.children:
