@@ -30,6 +30,9 @@ brooklyn.catalog:
       services:
       - type: brooklyn-rabbitmq-broker
         id: rabbitmq
+        # increased as was failing timeout on restart
+        brooklyn.config:
+          start.timeout: 5m
       - type: org.apache.brooklyn.test.framework.TestCase
         brooklyn.config:
           timeout: 1h
@@ -104,7 +107,14 @@ brooklyn.catalog:
           - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
             name: Check the RabbitMQ hello world tutorial runs ok
             command: |
-              sudo apt-get install -y python-pip
+              if [[ ! -z $(which yum) ]]; then
+                sudo yum -y install python-pip
+              elif [[ ! -z $(which apt-get) ]]; then
+                sudo apt-get install -y python-pip
+              else
+                echo "error can't install package $PACKAGE"
+                exit 1;
+              fi
               sudo pip install pika
               # send and recieve python files
               cat > ~/send.py <<- EOM
