@@ -18,6 +18,7 @@
 #
 brooklyn.catalog:
   items:
+  - "https://raw.githubusercontent.com/brooklyncentral/common-catalog-utils/master/common-tests/src/main/resources/commontests/common.tests.bom"
   - id: rabbitmq-broker-tests
     version: 1.0
     itemType: template
@@ -33,79 +34,28 @@ brooklyn.catalog:
         # increased as was failing timeout on restart
         brooklyn.config:
           start.timeout: 5m
-      - type: org.apache.brooklyn.test.framework.TestCase
+      - type: test-case
+        name: RabbitMQ Broker tests
         brooklyn.config:
           timeout: 1h
           targetId: rabbitmq
-        name: RabbitMQ Broker tests
         brooklyn.children:
-        - type: org.apache.brooklyn.test.framework.TestCase
-          name: "Initial Tests"
-          brooklyn.children:
-          # Is up and can deploy
-          - type: org.apache.brooklyn.test.framework.TestSensor
-            name: TEST [service.state] IS [running]
-            sensor: service.state
-            assert:
-            - matches: running
-        
-        - type: org.apache.brooklyn.test.framework.TestCase
-          name: "Effector Restart, Stop & Restart Tests"
-          brooklyn.children:      
-          # Effector: restart Tests
-          - type: org.apache.brooklyn.test.framework.TestEffector
-            name: Invoke restart Effector
-            effector: restart
-            params:
-              restartMachine: false
-          - type: org.apache.brooklyn.test.framework.TestSensor
-            name: Check RabbitMQ is up after restart
-            sensor: service.isUp
-            assert:
-            - equals: true
-          - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-            name: Check RabbitMQ process has restarted
-            command: ps -ef | grep [r]abbitmq
-            assertStatus:
-              equals: 0
-          # Effector: stop + restart Tests
-          - type: org.apache.brooklyn.test.framework.TestEffector
-            name: Invoke stop Effector
-            effector: stop
-            params:
-              stopMachineMode: NEVER
-          - type: org.apache.brooklyn.test.framework.TestSensor
-            name: Check RabbitMQ is not up after stop
-            sensor: service.isUp
-            assert:
-            - equals: false
-          - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-            name: Check RabbitMQ process has stopped
-            command: ps -ef | grep [r]abbitmq
-            assertStatus:
-              equals: 1
-          - type: org.apache.brooklyn.test.framework.TestEffector
-            name: Invoke restart Effector
-            effector: restart
-            params:
-              restartMachine: false
-          - type: org.apache.brooklyn.test.framework.TestSensor
-            name: Check RabbitMQ is up after restart
-            sensor: service.isUp
-            assert:
-            - equals: true
-          - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-            name: Check RabbitMQ process has restarted
-            command: ps -ef | grep [r]abbitmq
-            assertStatus:
-              equals: 0
-        
-        - type: org.apache.brooklyn.test.framework.TestCase
-          name: "Example Tests"
+        - type: assert-up-and-running-initial
+          name: "1. Node up and running"
+        - type: assert-restart-process
+          name: "2. restart process"
+          brooklyn.config:
+            process.grep.name: "[Rr]abbitmq"
+        - type: assert-stop-and-restart-process
+          name: "3. stop and restart process"
+          brooklyn.config:
+            process.grep.name: "[Rr]abbitmq"
+        - type: test-case
+          name: "4. RabbitMQ Example Tests"
           brooklyn.children:       
           # Run a hello world tutorial
           - type: org.apache.brooklyn.test.framework.SimpleShellCommandTest
-            name: Check the RabbitMQ hello world tutorial runs ok
+            name: "4.1 Check the RabbitMQ hello world tutorial runs ok"
             command: |
               if [[ ! -z $(which yum) ]]; then
                 sudo yum -y install python-pip
