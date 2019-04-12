@@ -92,9 +92,7 @@ brooklyn.catalog:
                   f.write(" [x] Received %r" % body)
                   f.close()
                   print(' [*] Writing message to out.txt')
-              channel.basic_consume(callback,
-                                    queue='hello',
-                                    no_ack=True)
+              channel.basic_consume('hello', callback, auto_ack=False)
               print(' [*] Waiting for messages. To exit press CTRL+C')
               channel.start_consuming()
               EOM
